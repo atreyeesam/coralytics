@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coralytics</title>
+  <meta name="description" content="Coralytics shows which coral reefs are worth restoring, using a model trained on 40 years of ocean temperature and 17,000 bleaching surveys.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="vendor/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="./" aria-label="Coralytics home">
+      <img src="favicon.svg" width="28" height="28" alt="">
+      <span>coralytics</span>
+    </a>
+    <button class="link" id="how-open" type="button">How it works</button>
+  </header>
+
+  <main class="layout">
+    <section class="map-wrap" aria-label="Map of reefs">
+      <div id="map"></div>
+      <p class="map-status" id="map-status">Loading reefs</p>
+      <ul class="legend" aria-label="Legend">
+        <li><span class="dot holds"></span>Holds on its own</li>
+        <li><span class="dot savable"></span>Needs tougher coral</li>
+        <li><span class="dot beyond"></span>Too hot to save</li>
+        <li><span class="dot ring"></span>Restoration project</li>
+      </ul>
+    </section>
+
+    <aside class="panel" id="panel" aria-live="polite">
+      <!-- Overview and reef detail views are rendered here by app.js -->
+      <div class="skeleton"><span></span><span></span><span></span></div>
+    </aside>
+  </main>
+
+  <dialog id="how" aria-labelledby="how-title">
+    <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+    <h2 id="how-title">How it works</h2>
+    <h3>The model</h3>
+    <p>Gradient-boosted trees (LightGBM) trained on daily NOAA sea temperature since 1985, at 5 km, and 17,332 diver surveys from the Global Coral Bleaching Database. It predicts the chance that at least 30% of a reef's corals bleach.</p>
+    <h3>Tested on years it never saw</h3>
+    <p>Trained on surveys up to 2013 and scored on 2016 to 2020. It ranks bleaching better than NOAA's standard heat alert: 0.935 against 0.906 AUROC, on 2,771 surveys.</p>
+    <h3>Checked against new surveys</h3>
+    <p>MERMAID, WCS's open reef survey platform, holds 201 bleaching surveys from 2021 to 2025 in 10 countries, all after the training data ends. The model ranks them at 0.84 AUROC for 30% or more of corals bleached.</p>
+    <h3>A bleaching year</h3>
+    <p>A year in which the model put the reef past 50% risk in its hottest month. Fast-growing corals need 10 to 15 years to recover (Hughes et al. 2018), so a reef <b>holds</b> if this happens 2 or fewer years in 10.</p>
+    <h3>Heat-tolerant coral</h3>
+    <p>"Needs tougher coral" means the reef bleaches too often today, but would hold if restored with coral bred or selected to cope with water a little warmer (0.5 °C by default). You can change that target with the bars in the side panel.</p>
+    <h3>Ranking places to restore</h3>
+    <p>Among reefs that need tougher coral, places rank higher when local pressure (fishing, runoff, coastal development, tourism, industry) is low and when nearby reefs supply plenty of coral larvae.</p>
+    <h3>Limits</h3>
+    <p>This is a screening tool, not a site survey. Scores cover 5 km reef cells, not individual reefs, and say nothing about depth, water quality on the day, or local management.</p>
+  </dialog>
+
+  <template id="tpl-overview">
+    <h1>Find reefs worth restoring</h1>
+    <p class="lede">Every reef scored on how often heat bleaches it, whether heat-tolerant coral would hold, and what else stops it recovering.</p>
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <input type="search" data-search placeholder="Search a country or reef region" aria-label="Search a country or reef region">
+    </label>
+    <label class="switch">
+      <input type="checkbox" role="switch" data-warm>
+      <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+      <span>Add 0.5 °C of warming, about 2040</span>
+    </label>
+    <div class="triage" data-triage></div>
+    <div class="tolerance">
+      <h2>What if we restore with tougher coral?</h2>
+      <p data-tol-lede></p>
+      <div class="tol-bars" data-tol-bars role="group" aria-label="How much warmer water restored coral can cope with"></div>
+      <p class="fine">Each bar is the share of reefs that would bleach no more than 2 years in 10. Click a bar to use that coral for the map and the ranking below.</p>
+    </div>
+    <div class="listhead">
+      <h2 data-list-title>Best places to restore</h2>
+      <button class="ghost small" type="button" data-csv></button>
+    </div>
+    <div class="sort" role="group" aria-label="Sort restoration sites">
+      <button type="button" data-sort="odds" aria-pressed="true">Best odds of lasting</button>
+      <button type="button" data-sort="people" aria-pressed="false">Most people nearby</button>
+    </div>
+    <ol class="list" data-list></ol>
+    <p class="fine" data-list-note></p>
+    <h2 class="examples-title">Examples</h2>
+    <div class="examples" data-examples></div>
+  </template>
+
+  <script src="vendor/maplibre-gl.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
